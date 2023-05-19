@@ -3,7 +3,7 @@ import { AccountType } from './accountType.enum';
 
 export class CreateAccountDto {
   @IsNotEmpty()
-  accountNumber: string;
+  name: string;
 
   @IsNotEmpty()
   balance: string;
