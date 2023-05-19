@@ -1,3 +1,116 @@
+## Installation
+
+```bash
+version: "3"
+services:
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: account_service
+    volumes:
+      - account_service_data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  db2:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: withdraw_service
+    volumes:
+      - withdraw_service_data:/var/lib/mysql
+    ports:
+      - 3307:3306
+
+  db3:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: deposit_service
+    volumes:
+      - deposit_service_data:/var/lib/mysql
+    ports:
+      - 3308:3306
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: db
+      PMA_ARBITRARY: 1
+      PMA_HOSTS: |
+        db:db
+        db2:db2
+        db3:db3
+      MYSQL_ROOT_PASSWORD: 123456
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper-microservice
+    ports:
+      - "2181:2181"
+    environment:
+      - ZOO_MY_ID=1
+      - ZOO_SERVERS=server.1=zookeeper:2888:3888
+
+  kafka1:
+    image: wurstmeister/kafka
+    container_name: kafka1-microservice
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_LISTENERS=PLAINTEXT://kafka1:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CREATE_TOPICS=test_topic:1:3
+
+  kafka2:
+    image: wurstmeister/kafka
+    container_name: kafka2-microservice
+    ports:
+      - "9093:9092"
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_LISTENERS=PLAINTEXT://kafka2:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9093
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+
+  kafka3:
+    image: wurstmeister/kafka
+    container_name: kafka3-microservice
+    ports:
+      - "9094:9092"
+    environment:
+      - KAFKA_BROKER_ID=3
+      - KAFKA_LISTENERS=PLAINTEXT://kafka3:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9094
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-microservice
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:9092,kafka2:9092,kafka3:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+      - KAFKA_CLUSTERS_0_ENABLEDELETE_TOPIC=true
+
+volumes:
+  account_service_data:
+  withdraw_service_data:
+  deposit_service_data:
+
+```
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
